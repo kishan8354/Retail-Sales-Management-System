@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Retail Sales Management</title>
+
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Optional small icon -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+    <!-- Inline CSS quick theme - paste into index.html for instant preview -->
+    <style>
+      :root{
+        --bg:#f5f7fb;
+        --card:#ffffff;
+        --muted:#6b7280;
+        --accent:#0b76ff;
+        --accent-2:#0f172a;
+        --border:#e6e9ef;
+        --surface-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+        --rounded:12px;
+      }
+
+      *{box-sizing:border-box}
+      html,body,#root{height:100%}
+      body{
+        margin:0;
+        font-family:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        background: linear-gradient(180deg, #f8fafc 0%, #f3f6fb 100%);
+        color:var(--accent-2);
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+      }
+
+      /* page container */
+      .app {
+        max-width:1300px;
+        margin:28px auto;
+        padding:20px;
+      }
+
+      header {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:16px;
+        margin-bottom:18px;
+      }
+      header h1 {
+        margin:0;
+        font-weight:700;
+        font-size:28px;
+        color:var(--accent-2);
+      }
+
+      /* Controls row */
+      .top-controls {
+        display:flex;
+        gap:12px;
+        align-items:center;
+        width:100%;
+      }
+
+      .search {
+        flex:1;
+        display:flex;
+        gap:8px;
+      }
+      .search input[type="text"]{
+        flex:1;
+        padding:12px 14px;
+        border-radius:10px;
+        border:1px solid var(--border);
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(16,24,40,0.02);
+        font-size:14px;
+      }
+      .search button{
+        padding:10px 14px;
+        border-radius:10px;
+        border: none;
+        background:var(--accent);
+        color:white;
+        font-weight:600;
+        cursor:pointer;
+        box-shadow: var(--surface-shadow);
+      }
+
+      .controls-right {
+        display:flex;
+        gap:10px;
+        align-items:center;
+      }
+      select, .control-btn {
+        padding:10px 12px;
+        border-radius:10px;
+        border:1px solid var(--border);
+        background:#fff;
+        font-size:14px;
+      }
+      .control-btn { cursor:pointer; }
+
+      /* layout */
+      .main {
+        display:grid;
+        gap:20px;
+        grid-template-columns: 320px 1fr;
+        align-items:start;
+      }
+
+      .panel {
+        background:var(--card);
+        padding:18px;
+        border-radius:var(--rounded);
+        box-shadow: var(--surface-shadow);
+        border: 1px solid rgba(15,23,42,0.03);
+      }
+
+      .panel h3 {
+        margin:0 0 12px 0;
+        font-size:18px;
+      }
+
+      /* filters */
+      .filter-section { margin-bottom:16px }
+      .filter-section label { display:flex; gap:8px; align-items:center; margin-bottom:8px; cursor:pointer; color:var(--accent-2) }
+      .filter-section input[type="checkbox"] { width:16px; height:16px; }
+
+      .age-range { display:flex; gap:8px; }
+      .age-range input { padding:8px; border-radius:8px; border:1px solid var(--border); width:100%; }
+
+      /* table styles */
+      .table-wrap {
+        overflow:auto;
+        border-radius:10px;
+        background:transparent;
+      }
+      table.table {
+        width:100%;
+        border-collapse:collapse;
+        min-width:920px;
+        background:var(--card);
+        box-shadow: var(--surface-shadow);
+      }
+      table thead th {
+        text-align:left;
+        padding:12px 16px;
+        font-weight:600;
+        color:var(--muted);
+        font-size:13px;
+        border-bottom:1px solid var(--border);
+        background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(250,250,251,0.6));
+      }
+      table tbody td {
+        padding:12px 16px;
+        border-bottom:1px solid rgba(230,233,239,0.8);
+        font-size:14px;
+        color:var(--accent-2);
+      }
+      table tbody tr:hover td {
+        background: linear-gradient(90deg, rgba(240,246,255,0.6), rgba(255,255,255,0));
+      }
+
+      .tag {
+        display:inline-block;
+        padding:6px 8px;
+        border-radius:999px;
+        font-size:12px;
+        background:#eef6ff;
+        color:var(--accent);
+        margin-right:6px;
+      }
+
+      /* pagination */
+      .pagination {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:12px 0;
+      }
+
+      /* responsive */
+      @media (max-width: 980px) {
+        .main { grid-template-columns: 1fr; }
+        .panel { order:2 }
+        .table-wrap { order:1; }
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Keep your React app mount point. The React app will render inside this root.
+           We provide a small fallback UI in case JavaScript fails. -->
+      <div class="app">
+        <header>
+          <h1>Retail Sales Management</h1>
+          <div class="controls-right small">Loading…</div>
+        </header>
+
+        <div class="top-controls">
+          <div class="search">
+            <input type="text" placeholder="Search customer name or phone" />
+            <button>Search</button>
+          </div>
+
+          <div class="controls-right">
+            <select>
+              <option>Date (Newest)</option>
+              <option>Quantity</option>
+              <option>Customer Name</option>
+            </select>
+            <button class="control-btn">Desc</button>
+          </div>
+        </div>
+
+        <div class="main" aria-hidden="true">
+          <aside class="panel" style="width:320px">
+            <div class="filter-section">
+              <h3>Region</h3>
+              <label><input type="checkbox" /> North</label>
+              <label><input type="checkbox" /> South</label>
+              <label><input type="checkbox" /> East</label>
+              <label><input type="checkbox" /> West</label>
+            </div>
+
+            <div class="filter-section">
+              <h3>Gender</h3>
+              <label><input type="checkbox" /> Male</label>
+              <label><input type="checkbox" /> Female</label>
+              <label><input type="checkbox" /> Other</label>
+            </div>
+
+            <div class="filter-section">
+              <h3>Age Range</h3>
+              <div class="age-range">
+                <input type="number" placeholder="Min" />
+                <input type="number" placeholder="Max" />
+              </div>
+            </div>
+          </aside>
+
+          <section class="table-wrap">
+            <table class="table" role="table" aria-label="Sales table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Region</th>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Qty</th>
+                  <th>Final Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="8" style="padding:36px; text-align:center; color:var(--muted)">React app is mounting…</td></tr>
+              </tbody>
+            </table>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- React will take over the #root element. -->
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
