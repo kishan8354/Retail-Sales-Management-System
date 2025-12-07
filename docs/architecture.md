@@ -69,78 +69,17 @@ Copy code
 ## 3. Data Flow
 
 ### Overall System Data Flow
-powershell
-Copy code
-              ┌─────────────────────────┐
-              │        Frontend          │
-              │  (React Components)      │
-              └────────────┬─────────────┘
-                           │ API Request
-                           ▼
-              ┌─────────────────────────┐
-              │         Backend          │
-              │  Controller → Service    │
-              └────────────┬─────────────┘
-                           │ Filter/Search/Sort
-                           ▼
-              ┌─────────────────────────┐
-              │     Dataset / JSON       │
-              └────────────┬─────────────┘
-                           │ Processed Data
-                           ▼
-              ┌─────────────────────────┐
-              │        Frontend          │
-              │   Render Paginated UI    │
-              └─────────────────────────┘
-yaml
-Copy code
+<img width="459" height="591" alt="image" src="https://github.com/user-attachments/assets/e8cdd7b6-6f61-480a-aaf3-8fc6c64c27de" />
 
 ---
 
 ## 4. Folder Structure
 
 ### Backend Folder Structure
-backend/
-│── data/
-│ └── sales.json
-│── src/
-│ ├── controllers/
-│ │ └── salesController.js
-│ ├── services/
-│ │ └── salesService.js
-│ ├── routes/
-│ │ └── salesRoutes.js
-│ ├── utils/
-│ │ ├── filtering.js
-│ │ ├── sorting.js
-│ │ └── pagination.js
-│ └── server.js
-└── package.json
-
-shell
-Copy code
+<img width="458" height="464" alt="Screenshot 2025-12-06 223055" src="https://github.com/user-attachments/assets/59c29ea9-eb73-4664-b374-f5576819b665" />
 
 ### Frontend Folder Structure
-frontend/
-│── src/
-│ ├── components/
-│ │ ├── SearchBar.jsx
-│ │ ├── FilterPanel.jsx
-│ │ ├── SortDropdown.jsx
-│ │ └── PaginatedTable.jsx
-│ ├── pages/
-│ │ └── Dashboard.jsx
-│ ├── hooks/
-│ │ └── useSalesData.js
-│ ├── services/
-│ │ └── api.js
-│ ├── assets/
-│ └── main.jsx
-│── public/
-└── package.json
-
-yaml
-Copy code
+<img width="418" height="554" alt="Screenshot 2025-12-06 223119" src="https://github.com/user-attachments/assets/24148e40-50aa-4f30-8e3e-55538192a23f" />
 
 ---
 
