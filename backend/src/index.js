@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const salesRoutes = require('./routes/sales');
 const { loadData } = require('./utils/dataLoader');
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4000||10000;
 const app = express();
 
 app.use(cors());
