@@ -1,4 +1,5 @@
 # Retail Sales Management System
+<img width="1916" height="799" alt="image" src="https://github.com/user-attachments/assets/f093bab0-b415-4f29-8a40-138be6140d08" />
 
 ## 1. Overview (3–5 lines)
 The Retail Sales Management System is a full-stack web application designed to manage, browse, and analyze structured sales data. It provides advanced search, filtering, sorting, and pagination capabilities with a clean, modular architecture. The system is built to demonstrate scalable engineering practices, maintainability, and optimal user experience.
