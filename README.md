@@ -1,34 +1,86 @@
 # Retail Sales Management System
 <img width="1916" height="799" alt="image" src="https://github.com/user-attachments/assets/f093bab0-b415-4f29-8a40-138be6140d08" />
 
-## 1. Overview (3–5 lines)
-The Retail Sales Management System is a full-stack web application designed to manage, browse, and analyze structured sales data. It provides advanced search, filtering, sorting, and pagination capabilities with a clean, modular architecture. The system is built to demonstrate scalable engineering practices, maintainability, and optimal user experience.
+## 1. Overview
+The Retail Sales Management System is a full-stack application designed to search, filter, sort, and paginate large-scale retail sales data.  
+It demonstrates production-grade architecture with a clean separation of concerns across backend, frontend, and database layers.  
+The system uses a Supabase PostgreSQL database for real-time querying and Express.js for robust API logic.
+
+---
 
 ## 2. Tech Stack
-**Frontend:** React, Vite, TypeScript, TailwindCSS  
-**Backend:** Node.js, Express.js  
-**Database:** Static JSON dataset / mock DB layer  
-**Tools & Libraries:** Axios, React Query (optional), ESLint, Prettier  
+
+### **Frontend**
+- React (Vite)
+- JavaScript (or TypeScript-ready)
+- Tailwind CSS
+- Axios for API communication
+
+### **Backend**
+- Node.js + Express.js
+- Supabase PostgreSQL
+- Supabase JavaScript SDK
+
+### **Tools & Utilities**
+- CORS, Morgan Logger
+- ESLint, Prettier (optional)
+- Render / Vercel for deployment
+
+---
 
 ## 3. Search Implementation Summary
-Search is implemented as a **full-text match across key fields** such as product name, category, region, and customer.  
-The frontend debounces user input and sends the query to the backend.  
-The backend filters the dataset by checking whether the search term exists in any searchable field (case-insensitive) and returns paginated results.
+- Full-text search implemented on **Customer Name** and **Phone Number**.  
+- Search is **case-insensitive** using Supabase `.ilike()` queries.  
+- Backend bundles search into OR conditions using Supabase `.or()` syntax.  
+- Works alongside all filters, sorting, and pagination.  
+- Frontend debounces user input before firing API calls.
+
+---
 
 ## 4. Filter Implementation Summary
-Filtering supports multiple attributes such as category, region, date range, quantity range, and price range.  
-Filters are combined using **AND logic**, ensuring accurate narrowing of results.  
-The backend receives all active filters and applies them sequentially to produce the final dataset.
+System supports the following filters:
+
+- Customer Region (multi-select)  
+- Gender  
+- Product Category  
+- Tags (multi-select, partial match)  
+- Payment Method  
+- Age Range  
+- Date Range  
+
+Backend applies filters using:
+- `.in()` for multi-select  
+- `.gte()` / `.lte()` for numeric or date ranges  
+- `.or()` for tag matching and multi-field conditions  
+
+All filters are combined using **AND logic**, ensuring accurate narrowing of records.
+
+---
 
 ## 5. Sorting Implementation Summary
-Sorting is supported for fields like date, price, quantity sold, and product name.  
-The backend applies a stable sort function and returns results in ascending or descending order based on query parameters.  
-Sorting integrates seamlessly with search, filter, and pagination logic.
+Sorting is supported for:
+
+| Frontend Sort Key | Database Column |
+|-------------------|------------------|
+| `date`            | `Date` |
+| `quantity`        | `Quantity` |
+| `name`            | `Customer Name` |
+
+Backend maps frontend sort keys to exact Supabase DB columns and performs:
+### Sorting Compatibility
+Sorting is fully compatible with:
+- **Search**
+- **All Filters**
+- **Pagination**
+
+Sorting does not break or reset active filters or search queries.  
+Every sort request returns the correct page and maintains consistent ordering.
+
+---
 
 ## 6. Pagination Implementation Summary
-Pagination uses a **limit–offset model** where the frontend requests specific slices of data.  
-The backend computes total records, total pages, and returns metadata (currentPage, pageSize, totalCount).  
-This ensures minimal payload and high performance even for large datasets.
+
+Pagination uses the **limit–offset model**, powered by Supabase:
 
 ## 7. Setup Instructions
 ### Backend Setup
@@ -44,6 +96,11 @@ This ensures minimal payload and high performance even for large datasets.
 4. `npm run dev`
 
 The application will now run locally with full search, filter, sorting, and pagination support.
-Live URLs:
-Frontend:[https://retail-sales-management-system-uin1.onrender.com/]
-Backend:https://retail-sales-management-system1.onrender.com
+## Live URLs
+
+**Frontend:**  
+https://retail-sales-management-system-uin1.onrender.com/
+
+**Backend:**  
+https://retail-sales-management-system1.onrender.com/
+
