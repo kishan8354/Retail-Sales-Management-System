@@ -1,69 +1,60 @@
 // backend/src/utils/dataLoader.js
 const fs = require('fs');
 const path = require('path');
-const { parse } = require('csv-parse/sync'); // sync parser for simplicity
+const { parse } = require('csv-parse/sync'); // or 'csv-parse' if you prefer async
 
 let SALES = [];
 
-/**
- * normalizeRow: convert CSV row to consistent object shape.
- * Edit keys if your CSV headers differ.
- */
-function normalizeRow(row = {}) {
-  const get = (...keys) => {
-    for (const k of keys) if (Object.prototype.hasOwnProperty.call(row, k) && row[k] !== undefined && row[k] !== null) return row[k];
-    return undefined;
-  };
-
-  const tagsRaw = get('Tags', 'tags') || '';
-  const tagsArr = Array.isArray(tagsRaw) ? tagsRaw : String(tagsRaw || '').split(',').map(s => s.trim()).filter(Boolean);
-
+function normalizeRow(row) {
+  // map fields as needed; keep _raw for debug
   return {
-    Date: get('Date', 'date') || '',
-    'Customer Name': get('Customer Name', 'customerName', 'customer_name') || '',
-    'Phone Number': get('Phone Number', 'phone', 'phone_number') || '',
-    Age: get('Age', 'age') ? Number(get('Age', 'age')) : null,
-    Region: get('Customer Region', 'Region', 'region', 'customerRegion') || '',
-    Gender: get('Gender', 'gender') || '',
-    'Product Name': get('Product Name', 'productName') || '',
-    'Product Category': get('Product Category', 'productCategory') || '',
-    'Quantity': get('Quantity') ? Number(get('Quantity')) : 0,
-    'Final Amount': get('Final Amount') ? Number(get('Final Amount')) : 0,
-    'Payment Method': get('Payment Method', 'paymentMethod') || '',
-    Tags: tagsArr,
+    Date: row['Date'] || row.date || '',
+    'Customer Name': row['Customer Name'] || row.customerName || '',
+    'Phone Number': row['Phone Number'] || row.phone || '',
+    Age: row['Age'] || row.age || '',
+    Region: row['Region'] || row.customerRegion || '',
+    Gender: row['Gender'] || row.gender || '',
+    'Product Name': row['Product Name'] || row.productName || '',
+    'Product Category': row['Product Category'] || row.productCategory || '',
+    Quantity: row['Quantity'] || row.quantity || 0,
+    'Final Amount': row['Final Amount'] || row.finalAmount || 0,
+    Tags: row['Tags'] || row.tags || '',
     _raw: row
   };
 }
 
-/**
- * loadData: loads CSV at backend/data/sales.csv into memory
- * returns number of rows loaded
- */
-async function loadData() {
-  const pCsv = path.join(__dirname, '..', '..', 'data', 'sales.csv');
-  const pJson = path.join(__dirname, '..', '..', 'data', 'sales.json');
+function loadLocalData() {
+  try {
+    const csvPath = path.join(__dirname, '..', '..', 'data', 'sales.csv');
+    const jsonPath = path.join(__dirname, '..', '..', 'data', 'sales.json');
 
-  // prefer CSV if present
-  if (fs.existsSync(pCsv)) {
-    const content = fs.readFileSync(pCsv, 'utf8');
-    const rows = parse(content, { columns: true, skip_empty_lines: true, trim: true });
-    SALES = rows.map(normalizeRow);
-    return SALES.length;
+    if (fs.existsSync(csvPath)) {
+      const content = fs.readFileSync(csvPath, 'utf8');
+      const rows = parse(content, { columns: true, skip_empty_lines: true, trim: true });
+      SALES = rows.map(normalizeRow);
+      console.log(`[dataLoader] Loaded ${SALES.length} rows from sales.csv`);
+      return SALES;
+    }
+
+    if (fs.existsSync(jsonPath)) {
+      const raw = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+      SALES = raw.map(normalizeRow);
+      console.log(`[dataLoader] Loaded ${SALES.length} rows from sales.json`);
+      return SALES;
+    }
+
+    console.warn('[dataLoader] No local dataset found; continuing with empty dataset.');
+    SALES = [];
+    return SALES;
+  } catch (err) {
+    console.warn('[dataLoader] Error loading local dataset (continuing with empty dataset):', err.message || err);
+    SALES = [];
+    return SALES;
   }
-
-  // fallback to JSON
-  if (fs.existsSync(pJson)) {
-    const raw = fs.readFileSync(pJson, 'utf8');
-    const arr = JSON.parse(raw);
-    SALES = arr.map(r => normalizeRow(r));
-    return SALES.length;
-  }
-
-  throw new Error(`No dataset found. Put sales.csv or sales.json into /data`);
 }
 
 function getSales() {
-  return SALES.slice(); // return shallow copy to avoid accidental mutability
+  return SALES;
 }
 
-module.exports = { loadData, getSales };
+module.exports = { loadLocalData, getSales };
