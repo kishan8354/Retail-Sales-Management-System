@@ -45,5 +45,5 @@ This ensures minimal payload and high performance even for large datasets.
 
 The application will now run locally with full search, filter, sorting, and pagination support.
 Live URLs:
-Frontend: https://retail-sales-management-system-20m7.onrender.com
-Backend:  https://retail-sales-management-system1.onrender.com
+Frontend:[https://retail-sales-management-system-uin1.onrender.com/]
+Backend:https://retail-sales-management-system1.onrender.com
