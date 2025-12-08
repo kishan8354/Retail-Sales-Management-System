@@ -1,61 +1,69 @@
+// backend/src/utils/dataLoader.js
 const fs = require('fs');
 const path = require('path');
-const { parse } = require('csv-parse');
+const { parse } = require('csv-parse/sync'); // sync parser for simplicity
 
-// In-memory dataset
 let SALES = [];
 
-function normalizeRow(row) {
-  // adapt field names according to csv header
-  // assume CSV contains headers matching assignment
+/**
+ * normalizeRow: convert CSV row to consistent object shape.
+ * Edit keys if your CSV headers differ.
+ */
+function normalizeRow(row = {}) {
+  const get = (...keys) => {
+    for (const k of keys) if (Object.prototype.hasOwnProperty.call(row, k) && row[k] !== undefined && row[k] !== null) return row[k];
+    return undefined;
+  };
+
+  const tagsRaw = get('Tags', 'tags') || '';
+  const tagsArr = Array.isArray(tagsRaw) ? tagsRaw : String(tagsRaw || '').split(',').map(s => s.trim()).filter(Boolean);
+
   return {
-    customerId: row['Customer ID'] || row['CustomerID'] || row.customerId,
-    customerName: row['Customer Name'] || row.customerName || '',
-    phone: row['Phone Number'] || row.phone || '',
-    gender: row['Gender'] || row.gender || '',
-    age: parseInt(row['Age'] || row.age || '0', 10) || null,
-    customerRegion: row['Customer Region'] || row.customerRegion || '',
-
-    productId: row['Product ID'] || row.productId || '',
-    productName: row['Product Name'] || row.productName || '',
-    brand: row['Brand'] || row.brand || '',
-    productCategory: row['Product Category'] || row.productCategory || '',
-    tags: (row['Tags'] || row.tags || '').toString().split(',').map(t => t.trim()).filter(Boolean),
-
-    quantity: parseFloat(row['Quantity'] || row.quantity || '0') || 0,
-    pricePerUnit: parseFloat(row['Price per Unit'] || row.pricePerUnit || '0') || 0,
-    discountPercentage: parseFloat(row['Discount Percentage'] || row.discountPercentage || '0') || 0,
-    totalAmount: parseFloat(row['Total Amount'] || row.totalAmount || '0') || 0,
-    finalAmount: parseFloat(row['Final Amount'] || row.finalAmount || '0') || 0,
-
-    date: row['Date'] || row.date || '',
-    paymentMethod: row['Payment Method'] || row.paymentMethod || '',
-    orderStatus: row['Order Status'] || row.orderStatus || '',
-    deliveryType: row['Delivery Type'] || row.deliveryType || '',
-    storeId: row['Store ID'] || row.storeId || '',
-    storeLocation: row['Store Location'] || row.storeLocation || '',
-    salespersonId: row['Salesperson ID'] || row.salespersonId || '',
-    employeeName: row['Employee Name'] || row.employeeName || ''
+    Date: get('Date', 'date') || '',
+    'Customer Name': get('Customer Name', 'customerName', 'customer_name') || '',
+    'Phone Number': get('Phone Number', 'phone', 'phone_number') || '',
+    Age: get('Age', 'age') ? Number(get('Age', 'age')) : null,
+    Region: get('Customer Region', 'Region', 'region', 'customerRegion') || '',
+    Gender: get('Gender', 'gender') || '',
+    'Product Name': get('Product Name', 'productName') || '',
+    'Product Category': get('Product Category', 'productCategory') || '',
+    'Quantity': get('Quantity') ? Number(get('Quantity')) : 0,
+    'Final Amount': get('Final Amount') ? Number(get('Final Amount')) : 0,
+    'Payment Method': get('Payment Method', 'paymentMethod') || '',
+    Tags: tagsArr,
+    _raw: row
   };
 }
 
+/**
+ * loadData: loads CSV at backend/data/sales.csv into memory
+ * returns number of rows loaded
+ */
 async function loadData() {
-  const filePath = path.join(__dirname, '..', '..', 'data', 'sales.csv');
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`Dataset not found at ${filePath}. Please put sales.csv there.`);
+  const pCsv = path.join(__dirname, '..', '..', 'data', 'sales.csv');
+  const pJson = path.join(__dirname, '..', '..', 'data', 'sales.json');
+
+  // prefer CSV if present
+  if (fs.existsSync(pCsv)) {
+    const content = fs.readFileSync(pCsv, 'utf8');
+    const rows = parse(content, { columns: true, skip_empty_lines: true, trim: true });
+    SALES = rows.map(normalizeRow);
+    return SALES.length;
   }
-  const content = fs.readFileSync(filePath);
-  return new Promise((resolve, reject) => {
-    parse(content, { columns: true, skip_empty_lines: true, trim: true }, (err, rows) => {
-      if (err) return reject(err);
-      SALES = rows.map(normalizeRow);
-      resolve(SALES);
-    });
-  });
+
+  // fallback to JSON
+  if (fs.existsSync(pJson)) {
+    const raw = fs.readFileSync(pJson, 'utf8');
+    const arr = JSON.parse(raw);
+    SALES = arr.map(r => normalizeRow(r));
+    return SALES.length;
+  }
+
+  throw new Error(`No dataset found. Put sales.csv or sales.json into /data`);
 }
 
 function getSales() {
-  return SALES;
+  return SALES.slice(); // return shallow copy to avoid accidental mutability
 }
 
 module.exports = { loadData, getSales };

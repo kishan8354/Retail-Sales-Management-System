@@ -1,30 +1,32 @@
-// src/index.js
+// backend/src/index.js
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 require('dotenv').config();
 
-const salesRoutes = require('./routes/sales');
+const salesRouter = require('./routes/sales');
+const { loadData } = require('./utils/dataLoader');
 
 const PORT = process.env.PORT || 4000;
-
 const app = express();
 
-// Middlewares
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 
-// ⭐ NO MORE loadData() — Supabase provides all data now.
+// mount router at /api/sales
+app.use('/api/sales', salesRouter);
 
-app.use('/api/sales', salesRoutes);
+// health
+app.get('/', (req, res) => res.send({ status: 'ok', message: 'Local Node backend running' }));
 
-// Test route
-app.get('/', (req, res) => {
-  res.send({ status: 'ok', message: 'Supabase backend running' });
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Load dataset first, then start server
+loadData()
+  .then(count => {
+    console.log(`Loaded dataset with ${count} rows`);
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch(err => {
+    console.error('Failed to load dataset, exiting.', err);
+    process.exit(1);
+  });
