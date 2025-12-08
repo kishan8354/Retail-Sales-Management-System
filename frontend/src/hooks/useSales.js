@@ -1,3 +1,4 @@
+// frontend/hooks/usesales.js
 import { useState, useEffect, useCallback } from "react";
 import { fetchSales } from "../services/api";
 import { buildQuery } from "../utils/queryBuilder";
@@ -15,7 +16,8 @@ const initialState = {
   endDate: "",
   sortBy: "date",
   order: "desc",
-  page: 1
+  page: 1,
+  limit: 10
 };
 
 export default function useSales() {
@@ -32,9 +34,10 @@ export default function useSales() {
       const s = overrideState || state;
       const q = buildQuery(s);
       const res = await fetchSales(q);
+      // res expected: { success, data, total, page, limit, totalPages }
       setData(res.data || []);
       setTotal(res.total || 0);
-      setPage(res.page || 1);
+      setPage(res.page || s.page || 1);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
       console.error("fetchData error:", err);
@@ -43,11 +46,11 @@ export default function useSales() {
     }
   }, [state]);
 
-  // fetch when page / sort / order changes or on mount
+  // fetch when state changes (page / sort / order / filters)
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.page, state.sortBy, state.order]);
+  }, [fetchData, state.page, state.sortBy, state.order]);
 
   return { state, setState, data, total, page, totalPages, loading, fetchData };
 }
+

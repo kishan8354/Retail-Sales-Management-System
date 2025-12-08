@@ -1,3 +1,4 @@
+// frontend/components/Salestable.jsx
 import React from "react";
 
 export default function SalesTable({ data = [], loading }) {

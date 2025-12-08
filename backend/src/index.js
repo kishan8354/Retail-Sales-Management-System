@@ -1,29 +1,30 @@
+// src/index.js
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const salesRoutes = require('./routes/sales');
-const { loadData } = require('./utils/dataLoader');
+require('dotenv').config();
 
-const PORT = process.env.PORT || 4000||10000;
+const salesRoutes = require('./routes/sales');
+
+const PORT = process.env.PORT || 4000;
+
 const app = express();
 
+// Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 
-// Load dataset into memory
-(async () => {
-  try {
-    await loadData();
-    console.log('Dataset loaded');
-  } catch (err) {
-    console.error('Failed to load dataset', err);
-    process.exit(1);
-  }
-})();
+// ⭐ NO MORE loadData() — Supabase provides all data now.
 
 app.use('/api/sales', salesRoutes);
 
-app.get('/', (req, res) => res.send({ status: 'ok' }));
+// Test route
+app.get('/', (req, res) => {
+  res.send({ status: 'ok', message: 'Supabase backend running' });
+});
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
